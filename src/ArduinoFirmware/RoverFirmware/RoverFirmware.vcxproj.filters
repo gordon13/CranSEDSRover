@@ -16,10 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="RoverFirmware.ino" />
-    <None Include="MotorControl.pde">
+    <None Include="MotorControl.ino">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="ServoControl.pde">
+    <None Include="ServoControl.ino">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
@@ -34,6 +34,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ServoControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RoverControlModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

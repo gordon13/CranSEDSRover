@@ -1,7 +1,4 @@
-#ifdef _WIN32 // if on windows, include this
-#include <iostream> 
-#endif
-
+#include "RoverControlModel.h"
 #include "Constants.h"
 #include "MotorControl.h"
 #include "ServoControl.h"
@@ -23,9 +20,8 @@ void update_locomotion();
 void update_harvest();
 void update_store();
 
-uint8_t state;
-long time_since_heartbeat;
 long prevMillis_check_heartbeat;
+long prevMillis_statemachine_update;
 
 // DEBUG
 unsigned long debug_time;        //time from millis()
@@ -34,35 +30,57 @@ boolean debugLedState;        //current LED state
 
 void setup()
 {
-#ifdef _WIN32 // if on windows, run this
-	std::cout << "[1 FIRMWARE] Setup" << std::endl;
-#endif
-	pinMode(53, OUTPUT);
-	state = SAFE;
+	Serial.begin(9600);
+	Serial.println("Initialising...");
+
+	prevMillis_check_heartbeat = millis();
+	prevMillis_statemachine_update - millis();
+	prev_debug_time = millis();
+
+	pinMode(DEBUG_LED_PIN, OUTPUT);
+
+	// ==================================
+	// initialise the rover control model
+	// ==================================
+	roverControlModel.state = SAFE;  // always default to SAFE
+	transition_safe();  // fire safe transition
+	roverControlModel.SteeringServo0 = { 0.0, 150, 500, 20 };  // steering servo
+	roverControlModel.SteeringServo1 = { 0.0, 150, 525, 20 };  // steering servo
+	
+
+	
+
+	ServoControlSetup();
 }
 
 
 
 void loop()
 {
-#ifdef _WIN32 // if on windows, run this
-	std::cout << "[1 FIRMWARE] Loop: " << iterations << std::endl;
-#endif
-	/*
-	Send telemetry
-	*/
-	if ((millis() - prevMillis_check_heartbeat) > 1000) {
-		// add send telemetry function
-		prevMillis_check_heartbeat = millis();
+	// set mode to SAFE since we haven't heard from the heartbeat in more than 2 seconds
+	if (roverControlModel.time_since_heartbeat > 2000) {
+		//Serial.print("Go into SAFE MODE");
+		roverControlModel.state = SAFE;
 	}
 
+	/*
+	Send telemetry data to Raspberry Pi
+	*/
+	if ((millis() - prevMillis_check_heartbeat) > 500) {
+		// + add send telemetry function
+		//Serial.println("Send telemetry");
+		prevMillis_check_heartbeat = millis();
+	}
 
 	/*
 	Update statemachine
 	*/
-	state_machine_run(calc_next_state());
+	if ((millis() - prevMillis_statemachine_update) > 50) {
+		//Serial.println("Call state machine");
+		state_machine_run(calc_next_state());
+		prevMillis_statemachine_update = millis();
+	}
 
-	delay(10);
 }
 
 
@@ -71,17 +89,16 @@ State machine
 */
 void state_machine_run(uint8_t next_state)
 {
-	// set mode to SAFE since we haven't heard from the heartbeat in more than 2 seconds
-	if (time_since_heartbeat > 2000) {
-		state = SAFE;
-	}
-
-	switch (state)
+	switch (roverControlModel.state)
 	{
 	case SAFE:
 		if (next_state == IDLE) {
 			transition_idle();
-			state = IDLE;
+			roverControlModel.state = IDLE;
+		}
+		if (next_state == CALIBRATE_SERVOS) {
+			// transition_****(); // TODO - add calibration transition?
+			roverControlModel.state = CALIBRATE_SERVOS;
 		}
 		update_safe();
 		break;
@@ -89,19 +106,19 @@ void state_machine_run(uint8_t next_state)
 	case IDLE:
 		if (next_state == LOCOMOTION) {
 			transition_locomotion();
-			state = LOCOMOTION;
+			roverControlModel.state = LOCOMOTION;
 		}
 		else if (next_state == HARVEST) {
 			transition_harvest();
-			state = HARVEST;
+			roverControlModel.state = HARVEST;
 		}
 		else if (next_state == SAFE) {
 			transition_safe();
-			state = SAFE;
+			roverControlModel.state = SAFE;
 		}
 		else if (next_state == STORE) {
 			transition_store();
-			state = STORE;
+			roverControlModel.state = STORE;
 		}
 		update_idle();
 		break;
@@ -109,11 +126,11 @@ void state_machine_run(uint8_t next_state)
 	case LOCOMOTION:
 		if (next_state == SAFE) {
 			transition_safe();
-			state = SAFE;
+			roverControlModel.state = SAFE;
 		}
 		else if (next_state == IDLE) {
 			transition_idle();
-			state = IDLE;
+			roverControlModel.state = IDLE;
 		}
 		update_locomotion();
 		break;
@@ -121,15 +138,15 @@ void state_machine_run(uint8_t next_state)
 	case HARVEST:
 		if (next_state == SAFE) {
 			transition_safe();
-			state = SAFE;
+			roverControlModel.state = SAFE;
 		}
 		else if (next_state == IDLE) {
 			transition_idle();
-			state = IDLE;
+			roverControlModel.state = IDLE;
 		}
 		else if (next_state == STORE) {
 			transition_store();
-			state = STORE;
+			roverControlModel.state = STORE;
 		}
 		update_harvest();
 		break;
@@ -137,13 +154,21 @@ void state_machine_run(uint8_t next_state)
 	case STORE:
 		if (next_state == SAFE) {
 			transition_safe();
-			state = SAFE;
+			roverControlModel.state = SAFE;
 		}
 		else if (next_state == IDLE) {
 			transition_idle();
-			state = IDLE;
+			roverControlModel.state = IDLE;
 		}
 		update_store();
+		break;
+
+	case CALIBRATE_SERVOS:
+		if (next_state == IDLE) {
+			transition_idle();
+			roverControlModel.state = IDLE;
+		}
+		update_calibrate_servos();
 		break;
 	}
 }
@@ -153,10 +178,12 @@ Utility functions
 */
 void DEBUG_LED_flash(int ontime, float offtime = 200)
 {
+	debug_time = millis();
 	if (debug_time - prev_debug_time > (debugLedState ? ontime : offtime)) {
-		digitalWrite(53, debugLedState = !debugLedState);
+		digitalWrite(DEBUG_LED_PIN, debugLedState = !debugLedState);
 		prev_debug_time = debug_time;
 	}
+	
 }
 
 
@@ -165,8 +192,8 @@ State machine functions
 */
 uint8_t calc_next_state()
 {
-	//code for reading the data from the comms and determining the next state
-	return 1;
+	// + code for reading the data from the comms and determining the next state
+	return roverControlModel.state; // for now, set to calibration state
 }
 
 
@@ -176,39 +203,43 @@ State transition functions - These are the state transition functions that are c
 */
 void transition_safe()
 {
-	// stop everything without reseting positions or anything. just stop everything except communication.
-
+	// + stop everything without reseting positions or anything. just stop everything except communication.
+	Serial.println("Transition -> SAFE");
 }
 
 void transition_idle()
 {
-	// set motor speed to 0
-	// set motor steering to 0
-	// set harvesting mechanism speed to 0
-	// stow harvesting mechanism
-
+	// + set motor speed to 0
+	// + set motor steering to 0
+	// + set harvesting mechanism speed to 0
+	// + stow harvesting mechanism
+	roverControlModel.DriveMotor0Speed = 0;
+	//roverControlModel.SteeringServo0Angle = 0;
+	Serial.println("Transition -> IDLE");
 }
 
 void transition_locomotion()
 {
-	// stow harvesting mechanism
+	// + stow harvesting mechanism
+	Serial.println("Transition -> LOCOMOTION");
 
 }
 
 void transition_harvest()
 {
-	// update motor speeds
-	// update steering angles
-	// update harvesting mechanism
-
+	// + update motor speeds
+	// + update steering angles
+	// + update harvesting mechanism
+	Serial.println("Transition -> HARVEST");
 }
 
 void transition_store()
 {
-	// set motor speed and steering to 0
-	// move mechanism to store position
-
+	// + set motor speed and steering to 0
+	// + move mechanism to store position
+	Serial.println("Transition -> STORE");
 }
+
 
 
 /*
@@ -216,35 +247,45 @@ State functions - These are the update functions for each state we've defined.
 */
 void update_safe()
 {
-	// make sure nothing updates
-	// only allow communication and telemetry
+	//Serial.println("Update safe LED");
+	// + make sure nothing updates
+	// + only allow communication and telemetry
 	DEBUG_LED_flash(100);
+	//delay(1000);
 }
 
 void update_idle()
 {
-	// make sure motors, mechanism, and steering at set to 0
-	// update harvesting stowing until it is fully stowed
+	//Serial.println("Update idle LED");
+	// + make sure motors, mechanism, and steering at set to 0
+	// + update harvesting stowing until it is fully stowed
 	DEBUG_LED_flash(200);
+	ServoControlUpdate();
+	//delay(1000);
 }
 
 void update_locomotion()
 {
-	// update motors and steering to match the messages received
+	// + update motors and steering to match the messages received
 	DEBUG_LED_flash(400);
 }
 
 void update_harvest()
 {
-	// update speed, steering, and harvesting mechanism
+	// + update speed, steering, and harvesting mechanism
 	DEBUG_LED_flash(800);
 }
 
 void update_store()
 {
-	// make sure motor speed and steering is zero
-	// set mechanism speed to release the material gathered
+	// + make sure motor speed and steering is zero
+	// + set mechanism speed to release the material gathered
 	DEBUG_LED_flash(1600);
+}
+
+void update_calibrate_servos()
+{
+	ServoControlCalibrateUpdate();
 }
 
 
