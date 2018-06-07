@@ -14,7 +14,7 @@ Pins - This is where we define all the pins that will be used
 /*
 State machine related stuff
 */
-enum State_enum { SAFE, IDLE, LOCOMOTION, HARVEST, STORE, CALIBRATE_SERVOS };
+enum State_enum { SAFE, IDLE, LOCOMOTION, HARVEST, STORE, CALIBRATE_SERVOS, TOTAL_STATES };
 //enum Sensors_enum { NONE, SENSOR_RIGHT, SENSOR_LEFT, BOTH };
 
 
@@ -22,9 +22,12 @@ enum State_enum { SAFE, IDLE, LOCOMOTION, HARVEST, STORE, CALIBRATE_SERVOS };
 /*
 Communication related stuff
 */
+#define SERIAL_INPUT_SIZE 30
+
+
 struct Messages
 {
-	enum Types_enum { HEARTBEAT, TELEMETRY, EMERGENCY_STOP, SET_MOTOR_SPEED, SET_MOTOR_STEERING };
+	enum Types_enum { HEARTBEAT, TELEMETRY, EMERGENCY_STOP, SET_MOTOR_SPEED, SET_MOTOR_STEERING, TOTAL_MESSAGE_TYPES};
 };
 
 

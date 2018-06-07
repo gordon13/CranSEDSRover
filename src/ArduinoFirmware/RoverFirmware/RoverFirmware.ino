@@ -1,8 +1,9 @@
+#include "Utility.h"
 #include "RoverControlModel.h"
 #include "Constants.h"
 #include "MotorControl.h"
 #include "ServoControl.h"
-
+#include "DebugConsole.h"
 /*
 Function declarations
 */
@@ -28,6 +29,10 @@ unsigned long debug_time;        //time from millis()
 unsigned long prev_debug_time;    //last time the LED changed state
 boolean debugLedState;        //current LED state
 
+/*
+Initialisation
+- This is where everything initialises
+*/
 void setup()
 {
 	Serial.begin(9600);
@@ -55,6 +60,10 @@ void setup()
 
 
 
+/*
+Main loop
+- This is where everything starts
+*/
 void loop()
 {
 	// set mode to SAFE since we haven't heard from the heartbeat in more than 2 seconds
@@ -75,13 +84,17 @@ void loop()
 	/*
 	Update statemachine
 	*/
+	String command;
 	if ((millis() - prevMillis_statemachine_update) > 50) {
-		//Serial.println("Call state machine");
+		UpdateDebugConsole();
 		state_machine_run(calc_next_state());
 		prevMillis_statemachine_update = millis();
 	}
 
 }
+
+
+
 
 
 /*
@@ -164,7 +177,11 @@ void state_machine_run(uint8_t next_state)
 		break;
 
 	case CALIBRATE_SERVOS:
-		if (next_state == IDLE) {
+		if (next_state == SAFE) {
+			transition_safe();
+			roverControlModel.state = SAFE;
+		}
+		else if (next_state == IDLE) {
 			transition_idle();
 			roverControlModel.state = IDLE;
 		}
@@ -183,7 +200,6 @@ void DEBUG_LED_flash(int ontime, float offtime = 200)
 		digitalWrite(DEBUG_LED_PIN, debugLedState = !debugLedState);
 		prev_debug_time = debug_time;
 	}
-	
 }
 
 
@@ -250,7 +266,7 @@ void update_safe()
 	//Serial.println("Update safe LED");
 	// + make sure nothing updates
 	// + only allow communication and telemetry
-	DEBUG_LED_flash(100);
+	DEBUG_LED_flash(1500);
 	//delay(1000);
 }
 
@@ -259,7 +275,7 @@ void update_idle()
 	//Serial.println("Update idle LED");
 	// + make sure motors, mechanism, and steering at set to 0
 	// + update harvesting stowing until it is fully stowed
-	DEBUG_LED_flash(200);
+	DEBUG_LED_flash(100);
 	ServoControlUpdate();
 	//delay(1000);
 }
@@ -267,20 +283,20 @@ void update_idle()
 void update_locomotion()
 {
 	// + update motors and steering to match the messages received
-	DEBUG_LED_flash(400);
+	//DEBUG_LED_flash(400);
 }
 
 void update_harvest()
 {
 	// + update speed, steering, and harvesting mechanism
-	DEBUG_LED_flash(800);
+	//DEBUG_LED_flash(800);
 }
 
 void update_store()
 {
 	// + make sure motor speed and steering is zero
 	// + set mechanism speed to release the material gathered
-	DEBUG_LED_flash(1600);
+	//DEBUG_LED_flash(1600);
 }
 
 void update_calibrate_servos()
