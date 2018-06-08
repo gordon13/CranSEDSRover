@@ -42,5 +42,8 @@
     <ClInclude Include="RoverControlModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DebugConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
