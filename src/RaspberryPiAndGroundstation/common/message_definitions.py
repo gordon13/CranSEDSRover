@@ -107,7 +107,7 @@ def encode_message(message_name, data):
 
 def decode_message(raw_data, identifier=None):
     if (identifier is None):
-        _identifier = validate_identifier(raw_data)
+        _identifier = retrieve_data_identifier(raw_data)
     else:
         _identifier = identifier
     message_definition_format = messages[_identifier]["binary_format_string"]
