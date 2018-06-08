@@ -4,6 +4,11 @@
 /*
 Rover model elements
 */
+struct S_DriveMotor {
+	int speed;
+	int direction;
+};
+
 struct S_ServoMotor {
 	float angle;
 	int minpulse;
@@ -29,7 +34,8 @@ struct S_RoverControlModel {
 	S_ServoMotor SteeringServo1;
 
 	// drive motors
-	int DriveMotor0Speed;  // RPM
+	S_DriveMotor DriveMotor0;  // RPM
+	S_DriveMotor DriveMotor1;  // RPM
 
 	// sensors
 	float BatteryTemperature; // Temp

@@ -4,10 +4,19 @@
 Pins - This is where we define all the pins that will be used
 */
 #define DEBUG_LED_PIN 49
-#define PIN_MOTOR1 5
-#define PIN_MOTOR2 6
-#define PIN_MOTOR3 7
-#define PIN_MOTOR4 8
+
+// The following motor pins are relating to the HW295 motor driver. One controller controls two motors hence the *_1..4 numbering scheme
+#define PIN_MOTOR0_IN1 30  
+#define PIN_MOTOR0_IN2 31
+#define PIN_MOTOR0_ENA 32
+
+#define PIN_MOTOR1_IN3 33
+#define PIN_MOTOR1_IN4 34
+#define PIN_MOTOR1_ENB 35
+
+// sensors
+#define PIN_SENSOR_TEMPERATURE 22
+#define PIN_SENSOR_VOLTAGE 23
 
 
 
@@ -29,7 +38,6 @@ struct Messages
 {
 	enum Types_enum { HEARTBEAT, TELEMETRY, EMERGENCY_STOP, SET_MOTOR_SPEED, SET_MOTOR_STEERING, TOTAL_MESSAGE_TYPES};
 };
-
 
 
 

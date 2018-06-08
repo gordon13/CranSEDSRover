@@ -132,6 +132,9 @@
     <ClInclude Include="Utility.h" />
     <ClInclude Include="__vm\.RoverFirmware.vsarduino.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BatteryControl.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

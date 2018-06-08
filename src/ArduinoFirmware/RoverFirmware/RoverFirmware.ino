@@ -39,23 +39,35 @@ void setup()
 	Serial.println("Initialising...");
 
 	prevMillis_check_heartbeat = millis();
-	prevMillis_statemachine_update - millis();
+	prevMillis_statemachine_update = millis();
 	prev_debug_time = millis();
 
+	// debug pins
 	pinMode(DEBUG_LED_PIN, OUTPUT);
 
 	// ==================================
 	// initialise the rover control model
 	// ==================================
+	Serial.println("Rover state model...");
 	roverControlModel.state = SAFE;  // always default to SAFE
 	transition_safe();  // fire safe transition
 	roverControlModel.SteeringServo0 = { 0.0, 150, 500, 20 };  // steering servo
 	roverControlModel.SteeringServo1 = { 0.0, 150, 525, 20 };  // steering servo
+	roverControlModel.DriveMotor0.speed = 0;  // drive motor
+	roverControlModel.DriveMotor0.direction = 1; 
+	roverControlModel.DriveMotor1.speed = 0;  // drive motor
+	roverControlModel.DriveMotor1.direction = 1;
 	
 
 	
-
+	// ==================================
+	// initialise control systems
+	// ==================================
+	Serial.println("Rover control systems...");
+	MotorControlSetup();
 	ServoControlSetup();
+
+	Serial.println("Ready.");
 }
 
 
@@ -284,6 +296,7 @@ void update_locomotion()
 {
 	// + update motors and steering to match the messages received
 	//DEBUG_LED_flash(400);
+	MotorControlUpdate();
 }
 
 void update_harvest()
