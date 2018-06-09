@@ -1,7 +1,6 @@
 #include "Utility.h"
 #include "RoverControlModel.h"
 #include "Constants.h"
-#include "MotorControl.h"
 #include "ServoControl.h"
 #include "DebugConsole.h"
 /*
@@ -53,10 +52,12 @@ void setup()
 	transition_safe();  // fire safe transition
 	roverControlModel.SteeringServo0 = { 0.0, 150, 500, 20 };  // steering servo
 	roverControlModel.SteeringServo1 = { 0.0, 150, 525, 20 };  // steering servo
-	roverControlModel.DriveMotor0.speed = 0;  // drive motor
-	roverControlModel.DriveMotor0.direction = 1; 
-	roverControlModel.DriveMotor1.speed = 0;  // drive motor
+	roverControlModel.DriveMotor0.targetSpeed = 0;  // drive motor
+	roverControlModel.DriveMotor0.direction = 1;
+	roverControlModel.DriveMotor0.accelerationTime = 1;
+	roverControlModel.DriveMotor1.targetSpeed = 0;  // drive motor
 	roverControlModel.DriveMotor1.direction = 1;
+	roverControlModel.DriveMotor1.accelerationTime = 1;
 	
 
 	
@@ -64,10 +65,12 @@ void setup()
 	// initialise control systems
 	// ==================================
 	Serial.println("Rover control systems...");
-	MotorControlSetup();
+	BatteryControlSetup();
+	MotorControlSetup(50);
 	ServoControlSetup();
 
 	Serial.println("Ready.");
+	delay(1000);
 }
 
 
@@ -99,6 +102,7 @@ void loop()
 	String command;
 	if ((millis() - prevMillis_statemachine_update) > 50) {
 		UpdateDebugConsole();
+		BatteryControlUpdate();
 		state_machine_run(calc_next_state());
 		prevMillis_statemachine_update = millis();
 	}
@@ -241,7 +245,7 @@ void transition_idle()
 	// + set motor steering to 0
 	// + set harvesting mechanism speed to 0
 	// + stow harvesting mechanism
-	roverControlModel.DriveMotor0Speed = 0;
+	roverControlModel.DriveMotor0.targetSpeed = 0;
 	//roverControlModel.SteeringServo0Angle = 0;
 	Serial.println("Transition -> IDLE");
 }

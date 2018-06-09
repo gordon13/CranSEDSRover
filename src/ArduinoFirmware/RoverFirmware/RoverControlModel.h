@@ -5,8 +5,10 @@
 Rover model elements
 */
 struct S_DriveMotor {
-	int speed;
+	int targetSpeed;
+	int currentSpeed;
 	int direction;
+	float accelerationTime;
 };
 
 struct S_ServoMotor {
@@ -40,6 +42,7 @@ struct S_RoverControlModel {
 	// sensors
 	float BatteryTemperature; // Temp
 	float BatteryVoltage;  // Voltage
+	float BatteryHumidity;  // Humidity
 
 	S_ServoMotor getServoByIndex(int i) {
 		switch (i) {

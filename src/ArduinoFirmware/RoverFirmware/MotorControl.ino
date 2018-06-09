@@ -1,10 +1,18 @@
-#include "MotorControl.h"
 #include "Constants.h"
+#include "SigmoidLUT.h"
+
+#define arr_len( x )  ( sizeof( x ) / sizeof( *x ) )
 
 int currentSpeed0;
-void MotorControlSetup()
+int currentSpeed1;
+byte direction0;
+byte direction1;
+int dt;
+void MotorControlSetup(int updateInterval)
 {
-	currentSpeed0 = roverControlModel.DriveMotor0.speed;
+	currentSpeed0 = roverControlModel.DriveMotor0.targetSpeed;
+	direction0 = roverControlModel.DriveMotor0.direction;
+	dt = updateInterval;
 
 	// set all the motor control pins to outputs
 	pinMode(PIN_MOTOR0_ENA, OUTPUT);
@@ -15,18 +23,30 @@ void MotorControlSetup()
 	pinMode(PIN_MOTOR1_IN4, OUTPUT);
 }
 
-byte direction0 = NULL;
-byte direction1 = NULL;
+
+int accelerationtime = 1000;
+int acceleration_iterations = int(accelerationtime / dt);
+int number_lut_points = arr_len(SigmoidLUT);
+int sample_every = int(number_lut_points / acceleration_iterations);
+int newspeed0 = roverControlModel.DriveMotor0.currentSpeed;
+int sigmoid_i0 = 0;
+int speed_difference0 = roverControlModel.DriveMotor0.targetSpeed - roverControlModel.DriveMotor0.currentSpeed;
+
 void MotorControlUpdate()
 {
-	if (currentSpeed0 != roverControlModel.DriveMotor0.speed) 
+	if (currentSpeed0 != roverControlModel.DriveMotor0.targetSpeed)
 	{
-		
+		newspeed0 = roverControlModel.DriveMotor0.currentSpeed + speed_difference0 * SigmoidLUT[sigmoid_i0];
+		if (sigmoid_i0 + sample_every < number_lut_points)
+		{
+			sigmoid_i0 += sample_every;
+			roverControlModel.DriveMotor0.currentSpeed = newspeed0;
+		}
 	} 
 	else 
 	{
 		direction0 = (roverControlModel.DriveMotor0.direction >= 1) ? HIGH : LOW;
-		setPinValues(PIN_MOTOR0_IN1, direction0, PIN_MOTOR0_IN2, direction0 * -1, PIN_MOTOR0_ENA, roverControlModel.DriveMotor0.speed);
+		setPinValues(PIN_MOTOR0_IN1, direction0, PIN_MOTOR0_IN2, direction0 * -1, PIN_MOTOR0_ENA, roverControlModel.DriveMotor0.targetSpeed);
 	}
 	
 	

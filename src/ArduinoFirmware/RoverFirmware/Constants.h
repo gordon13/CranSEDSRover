@@ -15,7 +15,7 @@ Pins - This is where we define all the pins that will be used
 #define PIN_MOTOR1_ENB 35
 
 // sensors
-#define PIN_SENSOR_TEMPERATURE 22
+#define PIN_SENSOR_TEMPERATURE 7
 #define PIN_SENSOR_VOLTAGE 23
 
 
