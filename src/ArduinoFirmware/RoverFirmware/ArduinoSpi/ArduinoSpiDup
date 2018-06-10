@@ -1,0 +1,110 @@
+#include <SPI.h>
+
+byte buf [100];
+volatile byte command = 0;
+volatile byte pos;
+volatile bool process_it;
+int i =0;
+
+void setup (void)
+{
+  Serial.begin (115200);   // debugging
+
+  // have to send on master in, *slave out*
+  pinMode (MISO, OUTPUT);
+
+  // turn on SPI in slave mode
+  SPCR |= _BV(SPE);
+   // turn on interrupts
+  SPCR |= _BV(SPIE);
+  // turn on SPI in slave mode
+ //  SPCR |= bit (SPE);
+  
+  // get ready for an interrupt
+//  pos = 0;   // buffer empty
+//  process_it = false;
+
+  // now turn on interrupts
+//  SPI.attachInterrupt();
+
+}  // end of setup
+
+
+// SPI interrupt routine
+//ISR (SPI_STC_vect)
+//{
+//byte c = SPDR;  // grab byte from SPI Data Register
+
+//  // add to buffer if room
+//  if (pos < sizeof buf)
+//    {
+//    buf [pos++] = c;
+//
+//    // example: newline means time to process buffer
+//    if (c == '\n')
+//      process_it = true;
+
+//    }  // end of room available
+  
+//}  // end of interrupt routine SPI_STC_vect
+
+ISR (SPI_STC_vect)
+  {
+  byte c = SPDR;
+  Serial.print("c is");
+  Serial.print(c);
+  if(i==0) {
+    command =c;
+  }
+  
+  switch (command)
+    {
+    // no command? then this is the command
+//    case 0:
+//      command = c;
+//      SPDR = 0;
+//      break;
+
+    // add to incoming byte, return result
+    case 97:
+      Serial.print("Adding case:");
+      Serial.print (c);
+      SPDR = c + 15;  // add 15
+      Serial.print(", New Value");
+      Serial.println(c);
+      i++;
+      break;
+
+    // subtract from incoming byte, return result
+    case 98:
+      Serial.print("Subtracting case:");
+      Serial.print(c);
+      SPDR = c - 8;  // subtract 8
+      Serial.print(", New Value");
+      Serial.println(SPDR);
+      break;
+
+    } // end of switch
+
+  }  // end of interrupt service routine (ISR) SPI_STC_vect
+
+
+// main loop - wait for flag set in interrupt routine
+//void loop (void)
+//{
+//  if (process_it)
+//    {
+//    buf [pos] = 0;
+//    Serial.println ((char*)buf);
+//    pos = 0;
+//    process_it = false;
+//    }  // end of flag set
+//
+//}  // end of loop
+void loop (void)
+  {
+
+  // if SPI not active, clear current command
+  if (digitalRead (SS) == HIGH)
+    command = 97;
+  }  // end of loop
