@@ -7,7 +7,7 @@ Rover model elements
 struct S_DriveMotor {
 	int targetSpeed;
 	int direction;
-	float accelerationTime;
+	float accelerationIncrement;
 
 	// used by the driver
 	int pin_ina; 
@@ -19,10 +19,7 @@ struct S_DriveMotor {
 	}
 	void incrementSpeed(int value) 
 	{
-		Serial.println("value: " + String(value) + ", current speed: " + String(currentSpeed));
-		int incval = currentSpeed + value;
-		currentSpeed = constrain(incval, 0, 255);
-		Serial.println("value: " + String(value) + ", current speed: " + String(currentSpeed));
+		currentSpeed = constrain(currentSpeed + value, 0, 255);
 	}
 private:
 	// shouldn't be able to edit this directly

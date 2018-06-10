@@ -6,21 +6,18 @@
 #include "StateTransitions.h"
 
 /*
+Variables
+*/
+int goSafemodeInterval = 2000;  // ms
+int heatbeatInterval = 500;  // ms
+int statemachineInterval = 50;  // ms
+int accelerationTime = 1000;  // ms
+
+/*
 Function declarations
 */
 void state_machine_run(uint8_t sensors);
 uint8_t calc_next_state();
-
-void transition_safe();
-void transition_idle();
-void transition_locomotion();
-void transition_harvest();
-void transition_store();
-void update_safe();
-void update_idle();
-void update_locomotion();
-void update_harvest();
-void update_store();
 
 long prevMillis_check_heartbeat;
 long prevMillis_statemachine_update;
@@ -54,16 +51,17 @@ void setup()
 	transition_safe();  // fire safe transition
 	roverControlModel.SteeringServo0 = { 0.0, 150, 500, 20 };  // steering servo
 	roverControlModel.SteeringServo1 = { 0.0, 150, 525, 20 };  // steering servo
+
 	roverControlModel.DriveMotor0.targetSpeed = 0;  // drive motor
 	roverControlModel.DriveMotor0.direction = 1;
-	roverControlModel.DriveMotor0.accelerationTime = 1;
+	roverControlModel.DriveMotor0.accelerationIncrement = floor(255 / (accelerationTime / statemachineInterval));
 	roverControlModel.DriveMotor0.pin_ina = PIN_MOTOR0_IN1;
 	roverControlModel.DriveMotor0.pin_inb = PIN_MOTOR0_IN2;
 	roverControlModel.DriveMotor0.pin_enable = PIN_MOTOR0_ENA;
+	
 	roverControlModel.DriveMotor1.targetSpeed = 0;  // drive motor
-
 	roverControlModel.DriveMotor1.direction = 1;
-	roverControlModel.DriveMotor1.accelerationTime = 1;
+	roverControlModel.DriveMotor1.accelerationIncrement = floor(255 / (accelerationTime / statemachineInterval));
 	roverControlModel.DriveMotor1.pin_ina = PIN_MOTOR1_IN3;
 	roverControlModel.DriveMotor1.pin_inb = PIN_MOTOR1_IN4;
 	roverControlModel.DriveMotor1.pin_enable = PIN_MOTOR1_ENB;
@@ -88,10 +86,11 @@ void setup()
 Main loop
 - This is where everything starts
 */
+
 void loop()
 {
 	// set mode to SAFE since we haven't heard from the heartbeat in more than 2 seconds
-	if (roverControlModel.time_since_heartbeat > 2000) {
+	if (roverControlModel.time_since_heartbeat > goSafemodeInterval) {
 		//Serial.print("Go into SAFE MODE");
 		roverControlModel.state = SAFE;
 	}
@@ -99,7 +98,7 @@ void loop()
 	/*
 	Send telemetry data to Raspberry Pi
 	*/
-	if ((millis() - prevMillis_check_heartbeat) > 500) {
+	if ((millis() - prevMillis_check_heartbeat) > heatbeatInterval) {
 		// + add send telemetry function
 		//Serial.println("Send telemetry");
 		prevMillis_check_heartbeat = millis();
@@ -108,13 +107,11 @@ void loop()
 	/*
 	Update statemachine
 	*/
-	String command;
-	if ((millis() - prevMillis_statemachine_update) > 50) {
+	if ((millis() - prevMillis_statemachine_update) > statemachineInterval) {
 		UpdateDebugConsole();
 		state_machine_run(calc_next_state());
 		prevMillis_statemachine_update = millis();
 	}
-
 }
 
 

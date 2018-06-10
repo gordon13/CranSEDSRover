@@ -27,11 +27,11 @@ void updateMotorPinValues(S_DriveMotor &motor)
 		int difference = target - motor.getCurrentSpeed();
 		if (difference >= 1 && motor.getCurrentSpeed() < target)
 		{
-			motor.incrementSpeed(1);
+			motor.incrementSpeed(motor.accelerationIncrement);
 		}
 		else if (difference < 1 && motor.getCurrentSpeed() > target)
 		{
-			motor.incrementSpeed(-1);
+			motor.incrementSpeed(-motor.accelerationIncrement);
 		}
 		analogWrite(motor.pin_enable, motor.getCurrentSpeed());
 	} 
