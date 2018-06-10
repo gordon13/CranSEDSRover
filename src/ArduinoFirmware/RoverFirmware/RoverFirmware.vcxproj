@@ -132,6 +132,7 @@
     <ClInclude Include="RoverControlModel.h" />
     <ClInclude Include="ServoControl.h" />
     <ClInclude Include="SigmoidLUT.h" />
+    <ClInclude Include="StateTransitions.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="__vm\.RoverFirmware.vsarduino.h" />
   </ItemGroup>

@@ -8,11 +8,11 @@ Pins - This is where we define all the pins that will be used
 // The following motor pins are relating to the HW295 motor driver. One controller controls two motors hence the *_1..4 numbering scheme
 #define PIN_MOTOR0_IN1 30  
 #define PIN_MOTOR0_IN2 31
-#define PIN_MOTOR0_ENA 32
+#define PIN_MOTOR0_ENA 8  // must be PWM
 
 #define PIN_MOTOR1_IN3 33
 #define PIN_MOTOR1_IN4 34
-#define PIN_MOTOR1_ENB 35
+#define PIN_MOTOR1_ENB 9  // must be PWM
 
 // sensors
 #define PIN_SENSOR_TEMPERATURE 7
@@ -31,7 +31,7 @@ enum State_enum { SAFE, IDLE, LOCOMOTION, HARVEST, STORE, CALIBRATE_SERVOS, TOTA
 /*
 Communication related stuff
 */
-#define SERIAL_INPUT_SIZE 30
+#define SERIAL_INPUT_SIZE 64
 
 
 struct Messages

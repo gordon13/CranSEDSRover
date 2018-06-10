@@ -48,6 +48,9 @@
     <ClInclude Include="SigmoidLUT.h">
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="StateTransitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatteryControl.ino">

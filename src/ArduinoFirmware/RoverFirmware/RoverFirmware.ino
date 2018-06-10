@@ -3,6 +3,8 @@
 #include "Constants.h"
 #include "ServoControl.h"
 #include "DebugConsole.h"
+#include "StateTransitions.h"
+
 /*
 Function declarations
 */
@@ -55,9 +57,16 @@ void setup()
 	roverControlModel.DriveMotor0.targetSpeed = 0;  // drive motor
 	roverControlModel.DriveMotor0.direction = 1;
 	roverControlModel.DriveMotor0.accelerationTime = 1;
+	roverControlModel.DriveMotor0.pin_ina = PIN_MOTOR0_IN1;
+	roverControlModel.DriveMotor0.pin_inb = PIN_MOTOR0_IN2;
+	roverControlModel.DriveMotor0.pin_enable = PIN_MOTOR0_ENA;
 	roverControlModel.DriveMotor1.targetSpeed = 0;  // drive motor
+
 	roverControlModel.DriveMotor1.direction = 1;
 	roverControlModel.DriveMotor1.accelerationTime = 1;
+	roverControlModel.DriveMotor1.pin_ina = PIN_MOTOR1_IN3;
+	roverControlModel.DriveMotor1.pin_inb = PIN_MOTOR1_IN4;
+	roverControlModel.DriveMotor1.pin_enable = PIN_MOTOR1_ENB;
 	
 
 	
@@ -66,7 +75,7 @@ void setup()
 	// ==================================
 	Serial.println("Rover control systems...");
 	BatteryControlSetup();
-	MotorControlSetup(50);
+	MotorControlSetup();
 	ServoControlSetup();
 
 	Serial.println("Ready.");
@@ -102,7 +111,6 @@ void loop()
 	String command;
 	if ((millis() - prevMillis_statemachine_update) > 50) {
 		UpdateDebugConsole();
-		BatteryControlUpdate();
 		state_machine_run(calc_next_state());
 		prevMillis_statemachine_update = millis();
 	}
@@ -231,50 +239,6 @@ uint8_t calc_next_state()
 
 
 /*
-State transition functions - These are the state transition functions that are called before the state is updated
-*/
-void transition_safe()
-{
-	// + stop everything without reseting positions or anything. just stop everything except communication.
-	Serial.println("Transition -> SAFE");
-}
-
-void transition_idle()
-{
-	// + set motor speed to 0
-	// + set motor steering to 0
-	// + set harvesting mechanism speed to 0
-	// + stow harvesting mechanism
-	roverControlModel.DriveMotor0.targetSpeed = 0;
-	//roverControlModel.SteeringServo0Angle = 0;
-	Serial.println("Transition -> IDLE");
-}
-
-void transition_locomotion()
-{
-	// + stow harvesting mechanism
-	Serial.println("Transition -> LOCOMOTION");
-
-}
-
-void transition_harvest()
-{
-	// + update motor speeds
-	// + update steering angles
-	// + update harvesting mechanism
-	Serial.println("Transition -> HARVEST");
-}
-
-void transition_store()
-{
-	// + set motor speed and steering to 0
-	// + move mechanism to store position
-	Serial.println("Transition -> STORE");
-}
-
-
-
-/*
 State functions - These are the update functions for each state we've defined.
 */
 void update_safe()
@@ -292,7 +256,12 @@ void update_idle()
 	// + make sure motors, mechanism, and steering at set to 0
 	// + update harvesting stowing until it is fully stowed
 	DEBUG_LED_flash(100);
+	roverControlModel.SteeringServo0.angle = 0;
+	roverControlModel.SteeringServo1.angle = 0;
+	roverControlModel.DriveMotor0.targetSpeed = 0;
+	roverControlModel.DriveMotor1.targetSpeed = 0;
 	ServoControlUpdate();
+	MotorControlUpdate();
 	//delay(1000);
 }
 

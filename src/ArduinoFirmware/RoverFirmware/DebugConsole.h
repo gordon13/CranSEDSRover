@@ -9,11 +9,12 @@ Commands:
 String command = "";
 String argument1 = "";
 void UpdateDebugConsole() {
-	if (Serial.available() > 0)
+	if (Serial.available() > 0 && Serial.available() <= 64)
 	{
 		// Get next command from Serial (add 1 for final 0)
 		char input[SERIAL_INPUT_SIZE + 1];
 		byte size = Serial.readBytes(input, SERIAL_INPUT_SIZE);
+			
 		// Add the final 0 to end the C string
 		input[size] = 0;
 
@@ -37,7 +38,7 @@ void UpdateDebugConsole() {
 						Serial.println("OUT: State:" + String(roverControlModel.state));
 						break;
 					}
-					else if (prop == "steeringservo0")
+					else if (strcmp(prop, "steeringservo0") == 0)
 					{
 						char* propspecific = strtok(NULL, " ");
 						if (strcmp(propspecific, "angle") == 0)
@@ -71,6 +72,21 @@ void UpdateDebugConsole() {
 							break;
 						}
 					}
+					else if (strcmp(prop, "drivemotor0") == 0)
+					{
+						char* propspecific = strtok(NULL, " ");
+						if (strcmp(propspecific, "currentspeed") == 0)
+						{
+							Serial.println("OUT: currentspeed:" + String(roverControlModel.DriveMotor0.getCurrentSpeed()));
+							break;
+						}
+						else if (strcmp(propspecific, "targetspeed") == 0)
+						{
+							Serial.println("OUT: targetspeed:" + String(roverControlModel.DriveMotor0.targetSpeed));
+							break;
+						}
+						break;
+					}
 					else
 					{
 						Serial.println("OUT: '" + String(prop) + "' not a valid rover state property.");
@@ -91,6 +107,8 @@ void UpdateDebugConsole() {
 					if (strcmp(prop, "state") == 0)
 					{
 						char* propvalue = strtok(NULL, " ");
+						Serial.println("propvalue:" + String(propvalue));
+
 						int stateindex;
 						if (validatePropValueInt(propvalue))
 						{
@@ -112,6 +130,34 @@ void UpdateDebugConsole() {
 							break;
 						}
 					}
+					else if (strcmp(prop, "drivemotor0") == 0)
+					{
+						char* specificprop = strtok(NULL, " ");
+						Serial.println("specificprop:" + String(specificprop));
+
+						if (strcmp(specificprop, "targetspeed") == 0)
+						{
+							char* propvalue = strtok(NULL, " ");
+							Serial.println("propvalue:" + String(propvalue));
+
+							if (validatePropValueInt(propvalue))
+							{
+								int speed = atoi(propvalue);
+								if (speed >= 0 && speed < 256) {
+									roverControlModel.DriveMotor0.targetSpeed = speed;
+									Serial.println("OUT: Set speed to " + String(speed));
+									command = NULL;
+									break;
+								}
+								else
+								{
+									Serial.println("OUT: '" + String(speed) + "' speed should be positive and less than 256.");
+									command = NULL;
+									break;
+								}
+							}
+						}
+					}
 				}
 				else
 				{
@@ -128,6 +174,10 @@ void UpdateDebugConsole() {
 			//command = strtok(0, " ");
 			break;
 		}
+	}
+	else if (Serial.available() > 64)
+	{
+		Serial.println("OUT: Command is too long. Should be less than 64 bytes!");
 	}
 }
 
