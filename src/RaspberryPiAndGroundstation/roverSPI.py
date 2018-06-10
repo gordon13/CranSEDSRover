@@ -1,3 +1,4 @@
+#!/usr/bin/python              
 import socket
 import sys
 import spidev
@@ -111,10 +112,10 @@ def atod(ascii):
     return decimal
 
 
-def main():
-    startComm()
-    recv_gs_send_spi()
+# def main():
+#     startComm()
+#     recv_gs_send_spi()
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
     

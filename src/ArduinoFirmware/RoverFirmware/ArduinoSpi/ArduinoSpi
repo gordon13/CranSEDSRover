@@ -1,0 +1,57 @@
+#include <SPI.h>
+
+char buf [100];
+//volatile byte command = 0;
+volatile byte pos;
+volatile bool process_it;
+int motor = 9;
+int m_speed = 0;
+void setup (void)
+{
+  Serial.begin (115200);   // debugging
+
+  // turn on SPI in slave mode
+  SPCR |= bit (SPE);
+
+  // have to send on master in, *slave out*
+  pinMode (MISO, OUTPUT);
+  pinMode (motor, OUTPUT);
+
+  // get ready for an interrupt
+  pos = 0;   // buffer empty
+  process_it = false;
+
+  // now turn on interrupts
+  SPI.attachInterrupt();
+
+}  // end of setup
+
+
+ISR (SPI_STC_vect)
+  {
+  byte c = SPDR;
+  if (pos < sizeof buf){
+    buf [pos++] = c;
+  }
+  if (c=='\n'){
+    process_it = true;
+  }
+
+} 
+
+
+
+void loop (void)
+{
+  if (process_it)
+    {
+    if (buf[0]=='m'){
+      // do operation
+      Serial.println ("motor speed was set");       
+    }
+    buf [pos] = 0;
+    Serial.println (buf);
+    pos = 0;
+    process_it = false;
+    } 
+}  
