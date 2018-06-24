@@ -24,7 +24,7 @@ void ServoControlSetup() {
 
 
 void ServoControlUpdate() {
-	pwm.setPWM(0, 0, degToPulse(roverControlModel.SteeringServo0.angle));
+	pwm.setPWM(0, 0, degToPulse(roverControlModel.ArmServo0.angle));
 }
 
 

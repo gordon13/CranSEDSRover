@@ -1,4 +1,5 @@
 #pragma once
+#include "RoverControlModel.h"
 
 /*
 State transition functions - These are the state transition functions that are called before the state is updated
@@ -15,16 +16,26 @@ void transition_idle()
 	// + set motor steering to 0
 	// + set harvesting mechanism speed to 0
 	// + stow harvesting mechanism
-	roverControlModel.DriveMotor0.targetSpeed = 0;
-	//roverControlModel.SteeringServo0Angle = 0;
 	Serial.println("Transition -> IDLE");
+	roverControlModel.DriveMotor0.targetSpeed = 0;
+	roverControlModel.DriveMotor1.targetSpeed = 0;
+	roverControlModel.DriveMotor2.targetSpeed = 0;
+	roverControlModel.DriveMotor3.targetSpeed = 0;
+	roverControlModel.MechanismMotor.targetSpeed = 0;
+	roverControlModel.ArmServo0.angle = 0;
+	roverControlModel.ArmServo1.angle = 0;
+	roverControlModel.MechanismServo.angle = 0;
+
 }
 
 void transition_locomotion()
 {
 	// + stow harvesting mechanism
 	Serial.println("Transition -> LOCOMOTION");
-
+	roverControlModel.ArmServo0.angle = 0;
+	roverControlModel.ArmServo1.angle = 0;
+	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.MechanismMotor.targetSpeed = 0;
 }
 
 void transition_harvest()
@@ -33,6 +44,10 @@ void transition_harvest()
 	// + update steering angles
 	// + update harvesting mechanism
 	Serial.println("Transition -> HARVEST");
+	roverControlModel.ArmServo0.angle = 45;
+	roverControlModel.ArmServo1.angle = 45;
+	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.MechanismMotor.targetSpeed = 100;
 }
 
 void transition_store()
@@ -40,4 +55,8 @@ void transition_store()
 	// + set motor speed and steering to 0
 	// + move mechanism to store position
 	Serial.println("Transition -> STORE");
+	roverControlModel.ArmServo0.angle = 0;
+	roverControlModel.ArmServo1.angle = 0;
+	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.MechanismMotor.targetSpeed = 0;
 }

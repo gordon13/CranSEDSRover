@@ -51,9 +51,24 @@
     <ClInclude Include="StateTransitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SPIControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StateUpdates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MotorControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\Users\paull\OneDrive\Documents\Arduino\libraries\DHTLib\dht.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatteryControl.ino">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SPIControl.ino">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

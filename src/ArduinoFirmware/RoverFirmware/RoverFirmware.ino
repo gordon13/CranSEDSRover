@@ -1,9 +1,9 @@
 #include "Utility.h"
-#include "RoverControlModel.h"
 #include "Constants.h"
-#include "ServoControl.h"
 #include "DebugConsole.h"
 #include "StateTransitions.h"
+#include "StateUpdates.h"
+
 
 /*
 Variables
@@ -12,6 +12,7 @@ int goSafemodeInterval = 2000;  // ms
 int heatbeatInterval = 500;  // ms
 int statemachineInterval = 50;  // ms
 int accelerationTime = 1000;  // ms
+
 
 /*
 Function declarations
@@ -22,10 +23,6 @@ uint8_t calc_next_state();
 long prevMillis_check_heartbeat;
 long prevMillis_statemachine_update;
 
-// DEBUG
-unsigned long debug_time;        //time from millis()
-unsigned long prev_debug_time;    //last time the LED changed state
-boolean debugLedState;        //current LED state
 
 /*
 Initialisation
@@ -49,8 +46,8 @@ void setup()
 	Serial.println("Rover state model...");
 	roverControlModel.state = SAFE;  // always default to SAFE
 	transition_safe();  // fire safe transition
-	roverControlModel.SteeringServo0 = { 0.0, 150, 500, 20 };  // steering servo
-	roverControlModel.SteeringServo1 = { 0.0, 150, 525, 20 };  // steering servo
+	roverControlModel.ArmServo0 = { 0.0, 150, 500, 20 };  // steering servo
+	roverControlModel.ArmServo1 = { 0.0, 150, 525, 20 };  // steering servo
 
 	roverControlModel.DriveMotor0.targetSpeed = 0;  // drive motor
 	roverControlModel.DriveMotor0.direction = 1;
@@ -72,6 +69,7 @@ void setup()
 	// initialise control systems
 	// ==================================
 	Serial.println("Rover control systems...");
+	SetupSPI();
 	BatteryControlSetup();
 	MotorControlSetup();
 	ServoControlSetup();
@@ -109,6 +107,7 @@ void loop()
 	*/
 	if ((millis() - prevMillis_statemachine_update) > statemachineInterval) {
 		UpdateDebugConsole();
+		UpdateSPI();
 		state_machine_run(calc_next_state());
 		prevMillis_statemachine_update = millis();
 	}
@@ -212,19 +211,6 @@ void state_machine_run(uint8_t next_state)
 }
 
 /*
-Utility functions
-*/
-void DEBUG_LED_flash(int ontime, float offtime = 200)
-{
-	debug_time = millis();
-	if (debug_time - prev_debug_time > (debugLedState ? ontime : offtime)) {
-		digitalWrite(DEBUG_LED_PIN, debugLedState = !debugLedState);
-		prev_debug_time = debug_time;
-	}
-}
-
-
-/*
 State machine functions
 */
 uint8_t calc_next_state()
@@ -232,61 +218,5 @@ uint8_t calc_next_state()
 	// + code for reading the data from the comms and determining the next state
 	return roverControlModel.state; // for now, set to calibration state
 }
-
-
-
-/*
-State functions - These are the update functions for each state we've defined.
-*/
-void update_safe()
-{
-	//Serial.println("Update safe LED");
-	// + make sure nothing updates
-	// + only allow communication and telemetry
-	DEBUG_LED_flash(1500);
-	//delay(1000);
-}
-
-void update_idle()
-{
-	//Serial.println("Update idle LED");
-	// + make sure motors, mechanism, and steering at set to 0
-	// + update harvesting stowing until it is fully stowed
-	DEBUG_LED_flash(100);
-	roverControlModel.SteeringServo0.angle = 0;
-	roverControlModel.SteeringServo1.angle = 0;
-	roverControlModel.DriveMotor0.targetSpeed = 0;
-	roverControlModel.DriveMotor1.targetSpeed = 0;
-	ServoControlUpdate();
-	MotorControlUpdate();
-	//delay(1000);
-}
-
-void update_locomotion()
-{
-	// + update motors and steering to match the messages received
-	//DEBUG_LED_flash(400);
-	MotorControlUpdate();
-}
-
-void update_harvest()
-{
-	// + update speed, steering, and harvesting mechanism
-	//DEBUG_LED_flash(800);
-}
-
-void update_store()
-{
-	// + make sure motor speed and steering is zero
-	// + set mechanism speed to release the material gathered
-	//DEBUG_LED_flash(1600);
-}
-
-void update_calibrate_servos()
-{
-	ServoControlCalibrateUpdate();
-}
-
-
 
 

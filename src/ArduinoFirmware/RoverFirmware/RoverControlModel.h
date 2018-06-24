@@ -47,12 +47,16 @@ struct S_RoverControlModel {
 	long time_since_heartbeat;  // time
 
 	// servos
-	S_ServoMotor SteeringServo0;
-	S_ServoMotor SteeringServo1;
+	S_ServoMotor ArmServo0;
+	S_ServoMotor ArmServo1;
+	S_ServoMotor MechanismServo;
 
 	// drive motors
 	S_DriveMotor DriveMotor0;  // RPM
 	S_DriveMotor DriveMotor1;  // RPM
+	S_DriveMotor DriveMotor2;  // RPM
+	S_DriveMotor DriveMotor3;  // RPM
+	S_DriveMotor MechanismMotor;  // RPM
 
 	// sensors
 	float BatteryTemperature; // Temp
@@ -62,10 +66,13 @@ struct S_RoverControlModel {
 	S_ServoMotor getServoByIndex(int i) {
 		switch (i) {
 		case 0:
-			return SteeringServo0;
+			return ArmServo0;
 			break;
 		case 1:
-			return SteeringServo1;
+			return ArmServo1;
+			break;
+		case 2:
+			return MechanismServo;
 			break;
 		}
 	}

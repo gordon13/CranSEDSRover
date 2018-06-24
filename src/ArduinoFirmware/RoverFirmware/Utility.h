@@ -1,6 +1,25 @@
 #pragma once
 #include "Constants.h"
 
+// DEBUG
+unsigned long debug_time;        //time from millis()
+unsigned long prev_debug_time;    //last time the LED changed state
+boolean debugLedState;        //current LED state
+
+
+/*
+Debug functions
+*/
+void DEBUG_LED_flash(int ontime, float offtime = 200)
+{
+	debug_time = millis();
+	if (debug_time - prev_debug_time > (debugLedState ? ontime : offtime)) {
+		digitalWrite(DEBUG_LED_PIN, debugLedState = !debugLedState);
+		prev_debug_time = debug_time;
+	}
+}
+
+
 /*
 Conversions
 */

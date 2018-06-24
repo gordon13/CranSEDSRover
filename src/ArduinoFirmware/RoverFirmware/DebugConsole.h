@@ -1,4 +1,5 @@
 #pragma once
+#include "RoverControlModel.h"
 
 /*
 Serial input
@@ -43,27 +44,27 @@ void UpdateDebugConsole() {
 						char* propspecific = strtok(NULL, " ");
 						if (strcmp(propspecific, "angle") == 0)
 						{
-							Serial.println("OUT: Angle:" + String(roverControlModel.SteeringServo0.angle));
+							Serial.println("OUT: Angle:" + String(roverControlModel.ArmServo0.angle));
 							break;
 						}
 						else if (strcmp(propspecific, "minpulse") == 0)
 						{
-							Serial.println("OUT: minpulse:" + String(roverControlModel.SteeringServo0.minpulse));
+							Serial.println("OUT: minpulse:" + String(roverControlModel.ArmServo0.minpulse));
 							break;
 						}
 						else if (strcmp(propspecific, "maxpulse") == 0)
 						{
-							Serial.println("OUT: maxpulse:" + String(roverControlModel.SteeringServo0.maxpulse));
+							Serial.println("OUT: maxpulse:" + String(roverControlModel.ArmServo0.maxpulse));
 							break;
 						}
 						else if (strcmp(propspecific, "zerocorrectionpulse") == 0)
 						{
-							Serial.println("OUT: zerocorrectionpulse:" + String(roverControlModel.SteeringServo0.zerocorrectionpulse));
+							Serial.println("OUT: zerocorrectionpulse:" + String(roverControlModel.ArmServo0.zerocorrectionpulse));
 							break;
 						}
 						else if (strcmp(propspecific, "midpulse") == 0)
 						{
-							Serial.println("OUT: midpulse:" + String(roverControlModel.SteeringServo0.midpulse()));
+							Serial.println("OUT: midpulse:" + String(roverControlModel.ArmServo0.midpulse()));
 							break;
 						}
 						else

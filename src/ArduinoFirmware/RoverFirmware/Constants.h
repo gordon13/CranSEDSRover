@@ -3,7 +3,7 @@
 /* 
 Pins - This is where we define all the pins that will be used
 */
-#define DEBUG_LED_PIN 49
+#define DEBUG_LED_PIN LED_BUILTIN
 
 // The following motor pins are relating to the HW295 motor driver. One controller controls two motors hence the *_1..4 numbering scheme
 #define PIN_MOTOR0_IN1 30  
@@ -18,7 +18,11 @@ Pins - This is where we define all the pins that will be used
 #define PIN_SENSOR_TEMPERATURE 7
 #define PIN_SENSOR_VOLTAGE 23
 
-
+// SPI
+#define PIN_SS 53
+#define PIN_SCK 52
+#define PIN_MOSI 51
+#define PIN_MISO 50
 
 /*
 State machine related stuff
