@@ -70,7 +70,7 @@ void setup()
 	// ==================================
 	Serial.println("Rover control systems...");
 	SetupSPI();
-	BatteryControlSetup();
+//	BatteryControlSetup();
 	MotorControlSetup();
 	ServoControlSetup();
 
@@ -110,6 +110,7 @@ void loop()
 		UpdateSPI();
 		state_machine_run(calc_next_state());
 		prevMillis_statemachine_update = millis();
+    Serial.println("Updating state of rover");
 	}
 }
 
