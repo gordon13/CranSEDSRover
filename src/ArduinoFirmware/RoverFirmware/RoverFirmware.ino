@@ -48,6 +48,7 @@ void setup()
 	transition_safe();  // fire safe transition
 	roverControlModel.ArmServo0 = { 0.0, 150, 500, 20 };  // steering servo
 	roverControlModel.ArmServo1 = { 0.0, 150, 525, 20 };  // steering servo
+	roverControlModel.BucketServo = { 0.0, 150, 525, 20 };  // steering servo
 
 	roverControlModel.DriveMotor0.targetSpeed = 0;  // drive motor
 	roverControlModel.DriveMotor0.direction = 1;
@@ -62,6 +63,27 @@ void setup()
 	roverControlModel.DriveMotor1.pin_ina = PIN_MOTOR1_IN3;
 	roverControlModel.DriveMotor1.pin_inb = PIN_MOTOR1_IN4;
 	roverControlModel.DriveMotor1.pin_enable = PIN_MOTOR1_ENB;
+
+	roverControlModel.DriveMotor2.targetSpeed = 0;  // drive motor
+	roverControlModel.DriveMotor2.direction = 1;
+	roverControlModel.DriveMotor2.accelerationIncrement = floor(255 / (accelerationTime / statemachineInterval));
+	roverControlModel.DriveMotor2.pin_ina = PIN_MOTOR2_IN1;
+	roverControlModel.DriveMotor2.pin_inb = PIN_MOTOR2_IN2;
+	roverControlModel.DriveMotor2.pin_enable = PIN_MOTOR2_ENA;
+
+	roverControlModel.DriveMotor3.targetSpeed = 0;  // drive motor
+	roverControlModel.DriveMotor3.direction = 1;
+	roverControlModel.DriveMotor3.accelerationIncrement = floor(255 / (accelerationTime / statemachineInterval));
+	roverControlModel.DriveMotor3.pin_ina = PIN_MOTOR3_IN3;
+	roverControlModel.DriveMotor3.pin_inb = PIN_MOTOR3_IN4;
+	roverControlModel.DriveMotor3.pin_enable = PIN_MOTOR3_ENB;
+
+	roverControlModel.MechanismMotor.targetSpeed = 0;  // drive motor
+	roverControlModel.MechanismMotor.direction = 1;
+	roverControlModel.MechanismMotor.accelerationIncrement = floor(255 / (accelerationTime / statemachineInterval));
+	roverControlModel.MechanismMotor.pin_ina = PIN_MOTOR5_IN1;
+	roverControlModel.MechanismMotor.pin_inb = PIN_MOTOR5_IN2;
+	roverControlModel.MechanismMotor.pin_enable = PIN_MOTOR5_ENA;
 	
 
 	
