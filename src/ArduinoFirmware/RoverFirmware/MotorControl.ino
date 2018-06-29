@@ -30,6 +30,7 @@ void MotorControlUpdate()
 	updateMotorPinValues(roverControlModel.DriveMotor1);
 	updateMotorPinValues(roverControlModel.DriveMotor2);
 	updateMotorPinValues(roverControlModel.DriveMotor3);
+	updateMotorPinValues(roverControlModel.MechanismMotor);
 }
 
 void updateMotorPinValues(S_DriveMotor &motor) 
