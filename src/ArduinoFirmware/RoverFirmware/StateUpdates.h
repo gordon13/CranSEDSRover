@@ -23,11 +23,12 @@ void update_idle()
 	DEBUG_LED_flash(100);
 	roverControlModel.ArmServo0.angle = 0;
 	roverControlModel.ArmServo1.angle = 0;
-	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.BucketServo.angle = 0;
 	roverControlModel.DriveMotor0.targetSpeed = 0;
 	roverControlModel.DriveMotor1.targetSpeed = 0;
 	roverControlModel.DriveMotor2.targetSpeed = 0;
 	roverControlModel.DriveMotor3.targetSpeed = 0;
+	roverControlModel.MechanismMotor.targetSpeed = 0;
 	ServoControlUpdate();
 	MotorControlUpdate();
 	//delay(1000);

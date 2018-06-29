@@ -24,7 +24,7 @@ void transition_idle()
 	roverControlModel.MechanismMotor.targetSpeed = 0;
 	roverControlModel.ArmServo0.angle = 0;
 	roverControlModel.ArmServo1.angle = 0;
-	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.BucketServo.angle = 0;
 
 }
 
@@ -34,7 +34,7 @@ void transition_locomotion()
 	Serial.println("Transition -> LOCOMOTION");
 	roverControlModel.ArmServo0.angle = 0;
 	roverControlModel.ArmServo1.angle = 0;
-	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.BucketServo.angle = 0;
 	roverControlModel.MechanismMotor.targetSpeed = 0;
 }
 
@@ -46,7 +46,7 @@ void transition_harvest()
 	Serial.println("Transition -> HARVEST");
 	roverControlModel.ArmServo0.angle = 45;
 	roverControlModel.ArmServo1.angle = 45;
-	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.BucketServo.angle = 0;
 	roverControlModel.MechanismMotor.targetSpeed = 100;
 }
 
@@ -57,6 +57,6 @@ void transition_store()
 	Serial.println("Transition -> STORE");
 	roverControlModel.ArmServo0.angle = 0;
 	roverControlModel.ArmServo1.angle = 0;
-	roverControlModel.MechanismServo.angle = 0;
+	roverControlModel.BucketServo.angle = 0;
 	roverControlModel.MechanismMotor.targetSpeed = 0;
 }

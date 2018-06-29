@@ -49,7 +49,7 @@ struct S_RoverControlModel {
 	// servos
 	S_ServoMotor ArmServo0;
 	S_ServoMotor ArmServo1;
-	S_ServoMotor MechanismServo;
+	S_ServoMotor BucketServo;
 
 	// drive motors
 	S_DriveMotor DriveMotor0;  // RPM
@@ -72,7 +72,7 @@ struct S_RoverControlModel {
 			return ArmServo1;
 			break;
 		case 2:
-			return MechanismServo;
+			return BucketServo;
 			break;
 		}
 	}

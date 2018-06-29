@@ -14,6 +14,18 @@ Pins - This is where we define all the pins that will be used
 #define PIN_MOTOR1_IN4 34
 #define PIN_MOTOR1_ENB 9  // must be PWM
 
+#define PIN_MOTOR2_IN1 35
+#define PIN_MOTOR2_IN2 36
+#define PIN_MOTOR2_ENA 10  // must be PWM
+
+#define PIN_MOTOR3_IN3 37
+#define PIN_MOTOR3_IN4 38
+#define PIN_MOTOR3_ENB 11  // must be PWM
+
+#define PIN_MOTOR5_IN1 39
+#define PIN_MOTOR5_IN2 40
+#define PIN_MOTOR5_ENA 12  // must be PWM
+
 // sensors
 #define PIN_SENSOR_TEMPERATURE 7
 #define PIN_SENSOR_VOLTAGE 23
@@ -40,7 +52,7 @@ Communication related stuff
 
 struct Messages
 {
-	enum Types_enum { HEARTBEAT, TELEMETRY, EMERGENCY_STOP, SET_MOTOR_SPEED, SET_MOTOR_STEERING, TOTAL_MESSAGE_TYPES};
+	enum Types_enum { HEARTBEAT, TELEMETRY, EMERGENCY_STOP, SET_MOTOR_SPEED, SET_SERVO_ANGLE, TOTAL_MESSAGE_TYPES};
 };
 
 
