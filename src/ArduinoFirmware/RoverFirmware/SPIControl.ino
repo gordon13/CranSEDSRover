@@ -66,6 +66,9 @@ void UpdateSPI(void)
 		}
 		else if (buf[0] == '3') {
 			// do operation
+      roverControlModel.state = LOCOMOTION;
+      Serial.print("setting state to:");
+      Serial.println(roverControlModel.state);
 			motor_index[0] = buf[1];
 
 			for (i = 2; i<5; i++) {
