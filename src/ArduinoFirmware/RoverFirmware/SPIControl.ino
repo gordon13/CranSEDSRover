@@ -79,18 +79,23 @@ void UpdateSPI(void)
 			{
 			case '0':
 				roverControlModel.DriveMotor0.targetSpeed = atoi(motor_speed);
+				roverControlModel.DriveMotor0.direction = (atoi(motor_speed)) > 1 ? true : false;
 				break;
 			case '1':
 				roverControlModel.DriveMotor1.targetSpeed = atoi(motor_speed);
+				roverControlModel.DriveMotor1.direction = (atoi(motor_speed)) > 1 ? true : false;
 				break;
 			case '2':
 				roverControlModel.DriveMotor2.targetSpeed = atoi(motor_speed);
+				roverControlModel.DriveMotor2.direction = (atoi(motor_speed)) > 1 ? true : false;
 				break;
 			case '3':
 				roverControlModel.DriveMotor3.targetSpeed = atoi(motor_speed);
+				roverControlModel.DriveMotor3.direction = (atoi(motor_speed)) > 1 ? true : false;
 				break;
 			case '4':
 				roverControlModel.MechanismMotor.targetSpeed = atoi(motor_speed);
+				roverControlModel.MechanismMotor.direction = (atoi(motor_speed)) > 1 ? true : false;
 				break;
 			default:
 				Serial.print("SPI - Invalid motor index :" + String(atoi(motor_index)));
