@@ -7,6 +7,8 @@ volatile byte pos;
 volatile bool process_it;
 char motor_index[20];
 char motor_speed[20];
+char mechanism_angle[20];
+char bucket_angle[20];
 int i;
 
 void SetupSPI(void)
@@ -110,6 +112,23 @@ void UpdateSPI(void)
 		else if (buf[0] == '4') {
 			// do operation
 			Serial.println("set motor steering");
+		}
+		else if (buf[0] == '5') {
+			// do operation
+			Serial.println("set mechanism angle");
+			for (i = 2; i<5; i++) {
+				mechanism_angle[i - 2] = buf[i];
+			}
+			roverControlModel.ArmServo0.angle = atoi(mechanism_angle);
+			roverControlModel.ArmServo1.angle = atoi(mechanism_angle);
+		}
+		else if (buf[0] == '5') {
+			// do operation
+			Serial.println("set bucket angle");
+			for (i = 2; i<5; i++) {
+				bucket_angle[i - 2] = buf[i];
+			}
+			roverControlModel.BucketServo.angle = atoi(bucket_angle);
 		}
 		else {
 			// do operation
