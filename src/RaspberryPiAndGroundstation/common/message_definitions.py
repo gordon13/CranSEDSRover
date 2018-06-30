@@ -39,6 +39,18 @@ messages = [
         "type": 4,
         "binary_format_string": "hf",
         "description": "set_motor_steering: motor_index, motor_speed"
+    },
+    {
+        "name": "set_mechanism_angle",
+        "type": 5,
+        "binary_format_string": "hf",
+        "description": "set_mechanism_angle: servo_index, servo_angle"
+    },
+    {
+        "name": "set_bucket_angle",
+        "type": 6,
+        "binary_format_string": "hf",
+        "description": "set_bucket_angle: servo_index, servo_angle"
     }
 ]
 
