@@ -28,8 +28,15 @@ class Application(tk.Frame):
         self.down_arrow_img = tk.PhotoImage(file="down_arrow.png")
         self.stop_button_img = tk.PhotoImage(file="stop_button.png")
         self.rover_speed = 0
+        self.master.bind('<Left>', lambda m="left": self.start_command_thread(m))
+        self.master.bind('<Right>', lambda m="right": self.start_command_thread(m))
+        self.master.bind('<Up>', lambda m="up": self.start_command_thread(m))
+        self.master.bind('<Down>', lambda m="down": self.start_command_thread(m))
+        self.master.bind('<m>', lambda m="mechanism": self.start_command_thread(m))
+        self.master.bind('<b>', lambda m="bucket": self.start_command_thread(m))
 
-
+        # self.master.bind('<Left>', self.leftKey)
+        self.master.focus_set()
         # self.pack()
         # self.create_widgets()
         self.create_panes(master)
@@ -97,6 +104,12 @@ class Application(tk.Frame):
         self.button_command_connect = tk.Button(self.control_panel, text="Start Control", command = self.start_command_session,padx = 2, relief= GROOVE)
         self.control_panel.add(self.button_command_connect)
 
+        #ADD CONNECT BUTTON
+        self.connect_button = tk.Button(self.control_panel, text="Connect to Rover", command=self.start_telemetry_thread, padx = 2, relief= GROOVE)
+        self.control_panel.add(self.connect_button)
+        #ADD DISCONNECT BUTTON
+        self.disconnect_button = tk.Button(self.control_panel, text="Disconnect from Rover",command=self.stop_telemetry_port, padx = 2, relief= GROOVE)
+        self.control_panel.add(self.disconnect_button)
 
         #place the buttons in control panel where we want them - Using Grid
         self.button_stop.grid(column= 1, row =1)
@@ -107,37 +120,59 @@ class Application(tk.Frame):
         self.button_move_mech.grid(column = 5, row = 1)
         self.button_stop_mech.grid(column = 6, row = 1)
         self.button_command_connect.grid(column = 7, row = 1)
+        self.connect_button.grid(column = 5, row = 2)
+        self.disconnect_button.grid(column=6, row=2)
 
 
 
-
-        #SLIDER LABEL
+        #MOTOR SLIDER LABEL
         self.speed_slider_label = Label(self.telemetry_panel, text="Set Duty Cycle : ", anchor='w')
         self.telemetry_panel.add(self.speed_slider_label)
 
         # TELEMETRY : add slider option for command to  telemetry (bad space management atm but no time)
-        self.speed_slider = tk.Scale(self.telemetry_panel, orient=HORIZONTAL, from_=0, to_=100, tickinterval=10, resolution=1, highlightbackground="black")
+        self.speed_slider = tk.Scale(self.telemetry_panel, orient=HORIZONTAL, from_=-100, to_=100, tickinterval=20, resolution=1, highlightbackground="black")
         self.speed_slider.bind("<ButtonRelease-1>", self.set_speed)
         self.telemetry_panel.add(self.speed_slider)
 
+        # MECHANISM SLIDER LABEL
+        self.mechanism_slider_label = Label(self.telemetry_panel, text="Set Mechanism Angle : ", anchor='w')
+        self.telemetry_panel.add(self.mechanism_slider_label)
+
+        # ADD SLIDER FOR MECHANISM CONTROL
+        self.mechanism_slider = tk.Scale(self.telemetry_panel, orient=HORIZONTAL, from_=0, to_=100, tickinterval=10,
+                                         resolution=1, highlightbackground="blue")
+        self.mechanism_slider.bind("<ButtonRelease-1>", self.set_mechanism_angle)
+        self.telemetry_panel.add(self.mechanism_slider)
+
+        # BUCKET SLIDER LABEL
+        self.bucket_slider_label = Label(self.telemetry_panel, text="Set Bucket Angle : ", anchor='w')
+        self.telemetry_panel.add(self.bucket_slider_label)
+
+        # ADD SLIDER FOR BUCKET CONTROL
+        self.bucket_slider = tk.Scale(self.telemetry_panel, orient=HORIZONTAL, from_=0, to_=100, tickinterval=10,
+                                         resolution=1, highlightbackground="red")
+        self.bucket_slider.bind("<ButtonRelease-1>", self.set_bucket_angle)
+        self.telemetry_panel.add(self.bucket_slider)
+
+
         # add display option for telemetry and command
-        #CONNECT BUTTON
-        self.connect_button = tk.Button(self.telemetry_panel, text="Connect to Rover", command=self.start_telemetry_thread)
-        self.telemetry_panel.add(self.connect_button)
-        #DISCONNECT BUTTON
-        self.disconnect_button = tk.Button(self.telemetry_panel, text="Disconnect from Rover",command=self.stop_telemetry_port)
-        self.telemetry_panel.add(self.disconnect_button)
+        # #CONNECT BUTTON
+        # self.connect_button = tk.Button(self.telemetry_panel, text="Connect to Rover", command=self.start_telemetry_thread)
+        # self.telemetry_panel.add(self.connect_button)
+        # #DISCONNECT BUTTON
+        # self.disconnect_button = tk.Button(self.telemetry_panel, text="Disconnect from Rover",command=self.stop_telemetry_port)
+        # self.telemetry_panel.add(self.disconnect_button)
         #LABEL TM WINDOW
         self.telemetry_label = Label(self.telemetry_panel, text="Telemetry window", anchor = 'w')
         self.telemetry_panel.add(self.telemetry_label)
         #TELEMETRY DISPLAY
-        self.telemetry_text = ScrolledText(self.telemetry_panel, background="black", foreground="yellow", height =10, width = 50, padx=5, pady =5)
+        self.telemetry_text = ScrolledText(self.telemetry_panel, background="black", foreground="yellow", height =10, width = 20, padx=5, pady =5)
         self.telemetry_panel.add(self.telemetry_text)
         #COMMAND DISPLAY LABEL
         self.command_label = Label(self.telemetry_panel, text="Command window", anchor = 'w')
         self.telemetry_panel.add(self.command_label)
         #COMMAND DISPLAY
-        self.command_text = ScrolledText(self.telemetry_panel, background="black", foreground="green", height =10, width = 50, padx=5, pady =5)
+        self.command_text = ScrolledText(self.telemetry_panel, background="black", foreground="green", height =10, width = 20, padx=5, pady =5)
         self.telemetry_panel.add(self.command_text)
 
 
@@ -175,67 +210,143 @@ class Application(tk.Frame):
         print(self.command_queue)
         self.command_text.insert('insert',self.command_queue.get())
 
-    def start_command_thread(self,button_name):
+    def start_command_thread(self,key_name):
         # print(button_name)
-        self.command_thread = Thread(target=self.command_pi(button_name))
+        self.command_thread = Thread(target=self.command_pi(key_name))
         self.command_thread.setDaemon(True)
         self.command_thread.start()
 
     def set_speed(self, event):
-        self.rover_speed = self.speed_slider.get()
+        self.rover_speed = self.speed_slider.get()*10
         # print(self.rover_speed)
 
-    def command_pi(self, button_name):
+    def set_mechanism_angle(self, event):
+        self.mechanism_angle = self.mechanism_slider.get()
+        print(self.mechanism_angle)
+
+    def set_bucket_angle(self, event):
+        self.bucket_angle = self.bucket_slider.get()
+        print(self.bucket_angle)
+    # @staticmethod
+    # def leftKey(event):
+    #     # if event == 37:
+    #     print(event.keysym)
+
+    def command_pi(self, key_name):
         self.write_command = Thread(target=self.start_command_queue, daemon=True)
         self.write_command.start()
         print("hey started queue thread")
         # print(self.command_queue.get())
 
-        if button_name=="left":
-            command = [1,self.rover_speed]
-            data_send = md.encode_message("set_motor_speed",command)
+        if key_name.keysym=="Left":
+            # self.mode = "left"
+            # while self.mode =="left"
+            command = []
+            for i in range(4):
+                message_name = "set_motor_speed"  # message_name = "emergency_stop"
+                motor_data = [i, self.rover_speed]
+                data_send = md.encode_message(message_name, motor_data)
+
+                #decoded_data = md.decode_message(encoded_data)
+                # print(list(decoded_data))
+                # command.append(encoded_data)
+                try:
+                    self.command_sock.sendall(data_send)
+                    time.sleep(0.1)
+                except socket.error:
+                    print("Failed to send command")
+                    sys.exit()
+                self.command_received_data = self.command_sock.recv(1024)
+                self.command_queue.put(self.command_received_data)
+
+            # data_send = command
             # self.command_text.insert('insert',"moving left, command: " + str(command) + '\n')
             print("this is left button {}".format(command))
-        elif button_name == "right":
+        elif  key_name.keysym=="Right":
+            # self.mode = "right"
             command = [1, self.rover_speed]
             data_send = md.encode_message("set_motor_speed", command)
+            try:
+                self.command_sock.sendall(data_send)
+                time.sleep(0.1)
+            except socket.error:
+                print("Failed to send command")
+                sys.exit()
+            self.command_received_data = self.command_sock.recv(1024)
+            self.command_queue.put(self.command_received_data)
             # self.command_text.insert('insert', "moving right, command: " + str(command) + '\n')
             print("this is right button {}".format(command))
-        elif button_name == "forward":
-            command = [1, self.rover_speed]
-            data_send = md.encode_message("set_motor_speed", command)
+        elif  key_name.keysym=="Up":
+            command = []
+            for i in range(4):
+                message_name = "set_motor_speed"  # message_name = "emergency_stop"
+                motor_data = [i, self.rover_speed]
+                data_send = md.encode_message(message_name, motor_data)
+
+                #decoded_data = md.decode_message(encoded_data)
+                # print(list(decoded_data))
+                # command.append(encoded_data)
+                try:
+                    self.command_sock.sendall(data_send)
+                    time.sleep(0.1)
+                except socket.error:
+                    print("Failed to send command")
+                    sys.exit()
+                self.command_received_data = self.command_sock.recv(1024)
+                self.command_queue.put(self.command_received_data)
             # self.command_text.insert('insert', "moving forward, command: " + str(command) + '\n')
             print("this is forward button {}".format(command))
-        elif button_name == "reverse":
-            command = [1, self.rover_speed]
+        elif  key_name.keysym=="Down":
+            # self.mode = "reverse"
+            command = [1, -self.rover_speed]
             data_send = md.encode_message("set_motor_speed", command)
-            # self.command_text.insert('insert', "moving reverse, command: " + str(command) + '\n')
+            # self.command_text.insert('insert', "moving reverse, commmand: " + str(command) + '\n')
             print("this is reverse button {}".format(command))
-        elif button_name == "stop":
+        elif key_name.keysym == "s":
+            # self.mode = "stop"
             command = [0]
             data_send = md.encode_message("emergency_stop", command)
             # self.command_text.insert('insert', "That's too much let's STOP, command: " + str(command) + '\n')
             print("this is stop button {}".format(command))
-        elif button_name == "collect":
-            command = [1, self.rover_speed]
-            data_send = md.encode_message("set_motor_speed", command)
+        elif key_name.keysym == "m":
+            # self.mode = "collect" MECHANISM SERVO
+            print("starting mechanism")
+            command = [1,self.mechanism_angle]
+            data_send = md.encode_message("set_mechanism_angle", command)
+            try:
+                self.command_sock.sendall(data_send)
+                time.sleep(0.1)
+            except socket.error:
+                print("Failed to send command")
+                sys.exit()
+            self.command_received_data = self.command_sock.recv(1024)
+            self.command_queue.put(self.command_received_data)
             # self.command_text.insert('insert', "Let's collect samples, command: " + str(command) + '\n')
             print("this is collection button {}".format(command))
-        elif button_name == "stopmech":
-            command = [1, self.rover_speed]
-            data_send = md.encode_message("set_motor_speed", command)
+        elif key_name.keysym == "b":
+            # self.mode = "bucket" BUCKET SERVO
+            command = [1,self.bucket_angle]
+            data_send = md.encode_message("set_mechanism_angle", command)
+            try:
+                self.command_sock.sendall(data_send)
+                time.sleep(0.1)
+            except socket.error:
+                print("Failed to send command")
+                sys.exit()
+            self.command_received_data = self.command_sock.recv(1024)
+            self.command_queue.put(self.command_received_data)
             # self.command_text.insert('insert', "Sample collection done, command: " + str(command) + '\n')
             print("this is mechanism stop button {}".format(command))
         else:
             print("No such command. Please check !")
 
-        try:
-            self.command_sock.sendall(data_send)
-        except socket.error:
-            print("Failed to send command")
-            sys.exit()
-        self.command_received_data = self.command_sock.recv(1024)
-        self.command_queue.put(self.command_received_data)
+        # try:
+        #     self.command_sock.sendall(data_send)
+        # except socket.error:
+        #     print("Failed to send command")
+        #     sys.exit()
+        # self.command_received_data = self.command_sock.recv(1024)
+        # self.command_queue.put(self.command_received_data)
 
         # self.command_port = 12340
         # # self.command_port = 80
@@ -264,7 +375,7 @@ class Application(tk.Frame):
         # time.sleep(1)
 
     def start_command_session(self):
-        self.command_port = 12340
+        self.command_port = 12341 #12340 is default
         # self.command_port = 80
         try:
             self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -272,7 +383,7 @@ class Application(tk.Frame):
             print("Failed to create command socket")
             sys.exit()  # quit program
         try:
-            command_host = socket.gethostbyname("192.168.137.108")  # www.google.com or IP of rover
+            command_host = socket.gethostbyname("192.168.137.33")  # www.google.com or IP of rover
         except socket.gaierror:
             print("Failed to get command host")
             sys.exit()
@@ -293,7 +404,7 @@ class Application(tk.Frame):
             print("Failed to create socket")
             sys.exit() #quit program
         try:
-            host = socket.gethostbyname("192.168.137.108")  # www.google.com or IP
+            host = socket.gethostbyname("192.168.137.33")  # www.google.com or IP
             # host = socket.gethostbyname("www.google.com") #www.google.com or IP
         except socket.gaierror:
             print("Failed to get host")
