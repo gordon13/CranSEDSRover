@@ -311,22 +311,23 @@ class Application(tk.Frame):
         elif key_name.keysym == "m":
             # self.mode = "collect" MECHANISM SERVO
             print("starting mechanism")
-            command = [1,self.mechanism_angle]
-            data_send = md.encode_message("set_mechanism_angle", command)
-            try:
-                self.command_sock.sendall(data_send)
-                time.sleep(0.1)
-            except socket.error:
-                print("Failed to send command")
-                sys.exit()
-            self.command_received_data = self.command_sock.recv(1024)
-            self.command_queue.put(self.command_received_data)
+            for i in range(2):
+                command = [i,self.mechanism_angle]
+                data_send = md.encode_message("set_mechanism_angle", command)
+                try:
+                    self.command_sock.sendall(data_send)
+                    time.sleep(0.1)
+                except socket.error:
+                    print("Failed to send command")
+                    sys.exit()
+                self.command_received_data = self.command_sock.recv(1024)
+                self.command_queue.put(self.command_received_data)
             # self.command_text.insert('insert', "Let's collect samples, command: " + str(command) + '\n')
-            print("this is collection button {}".format(command))
+            # print("this is arm button {}".format(command))
         elif key_name.keysym == "b":
             # self.mode = "bucket" BUCKET SERVO
-            command = [1,self.bucket_angle]
-            data_send = md.encode_message("set_mechanism_angle", command)
+            command = [3,self.bucket_angle]
+            data_send = md.encode_message("set_bucket_angle", command)
             try:
                 self.command_sock.sendall(data_send)
                 time.sleep(0.1)
